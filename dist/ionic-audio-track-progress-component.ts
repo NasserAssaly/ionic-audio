@@ -1,5 +1,5 @@
-import {IAudioTrack} from './ionic-audio-interfaces'; 
-import {Component, DoCheck,  ElementRef, Renderer, Input } from '@angular/core';
+import { IAudioTrack } from './ionic-audio-interfaces';
+import { Component, DoCheck, ElementRef, Renderer, Input } from '@angular/core';
 
 /**
  * # ```<audio-track-progress>``` 
@@ -17,8 +17,8 @@ import {Component, DoCheck,  ElementRef, Renderer, Input } from '@angular/core';
  * @class AudioTrackProgressComponent
  */
 @Component({
-    selector: 'audio-track-progress',
-    template: '<em *ngIf="audioTrack.duration > 0">{{audioTrack.progress | audioTime}} / </em><em>{{audioTrack.duration | audioTime}}</em>'
+  selector: 'audio-track-progress',
+  template: '<em *ngIf="audioTrack.duration > 0">{{audioTrack.progress | audioTime}} / </em><em>{{audioTrack.duration | audioTime}}</em>'
 })
 export class AudioTrackProgressComponent {
   /**
@@ -27,7 +27,7 @@ export class AudioTrackProgressComponent {
    * @property @Input() audioTrack
    * @type {IAudioTrack}
    */
-  @Input() audioTrack: IAudioTrack;  
+  @Input() audioTrack: IAudioTrack;
 }
 
 /**
@@ -46,9 +46,9 @@ export class AudioTrackProgressComponent {
  * @class AudioTrackProgressBarComponent
  */
 @Component({
-    selector: 'audio-track-progress-bar',
-    template: `
-    <ion-range [(ngModel)]="range" min="0" max="100" (ionChange)="seekTo()" name="progress" ngDefaultControl>
+  selector: 'audio-track-progress-bar',
+  template: `
+    <ion-range [(ngModel)]="range" disabled="{{!audioTrack.isPlaying}}" min="0" max="100" (ionChange)="seekTo()" name="progress" ngDefaultControl>
       <time *ngIf="showProgress" range-left>{{audioTrack.progress | audioTime}}</time>
       <time *ngIf="showDuration" range-right>{{audioTrack.duration | audioTime}}</time>
     </ion-range>
@@ -62,14 +62,16 @@ export class AudioTrackProgressBarComponent implements DoCheck {
    * @type {IAudioTrack}
    */
   @Input() audioTrack: IAudioTrack;
-  
+
   public completed: number = 0;
   public range: number = 0;
   public showDuration: boolean;
   public showProgress: boolean;
-  constructor(private el: ElementRef, private renderer: Renderer) { 
+  public etqTimer: any;
+
+  constructor(private el: ElementRef, private renderer: Renderer) {
   }
-  
+
   /**
    * Input property indicating whether to display track progress 
    * 
@@ -77,10 +79,10 @@ export class AudioTrackProgressBarComponent implements DoCheck {
    * @type {boolean}
    */
   @Input()
-  public set progress(v : boolean) {
+  public set progress(v: boolean) {
     this.showProgress = true;
   }
-  
+
   /**
    * Input property indicating whether to display track duration 
    * 
@@ -88,23 +90,55 @@ export class AudioTrackProgressBarComponent implements DoCheck {
    * @type {boolean}
    */
   @Input()
-  public set duration(v:  boolean) {
+  public set duration(v: boolean) {
     this.showDuration = true;
   }
-  
+
   ngOnInit() {
-    this.renderer.setElementStyle(this.el.nativeElement, 'width', '100%');       
+    console.log('init the progress');
+    this.renderer.setElementStyle(this.el.nativeElement, 'width', '100%');
   }
-  
+
+
   ngDoCheck() {
-    if(this.audioTrack.completed > 0 && !Object.is(this.audioTrack.completed, this.completed)) {
-      this.completed = this.audioTrack.completed; 
-      this.range = Math.round(this.completed*100*100)/100;
+    if (this.audioTrack.completed > 0 && !Object.is(this.audioTrack.completed, this.completed)) {
+
+      if (!this.etqTimer) {
+
+        this.etqTimer = setInterval(() => {
+          this.fat7e();
+        }, 100);
+      }
+
     }
   }
-  
-  seekTo() {
-    let seekTo: number = Math.round(this.audioTrack.duration*this.range)/100;
-    if (!Number.isNaN(seekTo)) this.audioTrack.seekTo(seekTo);     
+
+
+  fat7e() {
+    this.completed = this.audioTrack.completed;
+    this.range = Math.round(this.completed * 100 * 100) / 100;
+
+    console.log('isFinished = ' + this.audioTrack.isFinished);
+
+    if (this.audioTrack.isFinished) {
+      this.range = 1;
+      clearInterval(this.etqTimer);
+      this.etqTimer = null;
+      this.audioTrack.isFinished = false;
+    }
+
   }
+
+
+  seekTo() {
+    let seekTo: number = Math.round(this.audioTrack.duration * this.range) / 100;
+    if (!Number.isNaN(seekTo)) {
+      this.audioTrack.seekTo(seekTo);
+    }
+  }
+
+
+
+
+
 }
