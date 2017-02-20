@@ -104,9 +104,8 @@ export class AudioTrackProgressBarComponent implements DoCheck {
     if (this.audioTrack.completed > 0 && !Object.is(this.audioTrack.completed, this.completed)) {
 
       if (!this.etqTimer) {
-
         this.etqTimer = setInterval(() => {
-          this.fat7e();
+          this.updateTracker();
         }, 100);
       }
 
@@ -114,7 +113,7 @@ export class AudioTrackProgressBarComponent implements DoCheck {
   }
 
 
-  fat7e() {
+  updateTracker() {
     this.completed = this.audioTrack.completed;
     this.range = Math.round(this.completed * 100 * 100) / 100;
 
