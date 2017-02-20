@@ -141,6 +141,16 @@ export class AudioTrackComponent implements DoCheck {
     return this.hasLoaded;
   }
   
+
+  public get isFinished(): boolean {
+    return this._audioTrack.isFinished;
+  }
+
+  public set isFinished(value) {
+    this._audioTrack.isFinished = value;
+  }
+
+
   ngDoCheck() {
     if(!Object.is(this._audioTrack.isFinished, this._isFinished)) {
       // some logic here to react to the change
